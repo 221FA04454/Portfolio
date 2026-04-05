@@ -1,7 +1,14 @@
 import './style.css';
 
 // Initialize Lucide Icons
-lucide.createIcons();
+const initLucide = () => {
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+};
+
+document.addEventListener('DOMContentLoaded', initLucide);
+initLucide(); // Fallback in case DOMContentLoaded already fired
 
 // --- Reveal on Scroll Logic ---
 const observerOptions = {
@@ -51,13 +58,61 @@ sections.forEach(section => {
     navObserver.observe(section);
 });
 
+// --- Mobile Navigation Toggle ---
+const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
+const navLinksWrapper = document.querySelector('.nav-links-wrapper');
+const menuIcon = document.getElementById('menu-icon');
+
+const updateMenuIcon = (isOpen) => {
+    if (!menuIcon) return;
+    if (isOpen) {
+        menuIcon.setAttribute('data-lucide', 'x');
+    } else {
+        menuIcon.setAttribute('data-lucide', 'menu');
+    }
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+};
+
+if (mobileNavToggle && navLinksWrapper) {
+    mobileNavToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navLinksWrapper.classList.toggle('active');
+        const isOpen = navLinksWrapper.classList.contains('active');
+        updateMenuIcon(isOpen);
+    });
+
+    // Close menu when clicking a link
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            navLinksWrapper.classList.remove('active');
+            updateMenuIcon(false);
+        });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!navLinksWrapper.contains(e.target) && !mobileNavToggle.contains(e.target)) {
+            if (navLinksWrapper.classList.contains('active')) {
+                navLinksWrapper.classList.remove('active');
+                updateMenuIcon(false);
+            }
+        }
+    });
+}
+
 // --- Navbar Blur Effect on Scroll ---
 const nav = document.querySelector('nav');
 window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-        nav.style.background = 'rgba(255, 255, 255, 0.95)';
+    if (window.scrollY > 20) {
+        nav.style.background = 'rgba(255, 255, 255, 0.9)';
+        nav.style.height = '4.5rem';
+        nav.style.boxShadow = 'var(--shadow-sm)';
     } else {
         nav.style.background = 'rgba(255, 255, 255, 0.8)';
+        nav.style.height = '5rem';
+        nav.style.boxShadow = 'none';
     }
 });
 
